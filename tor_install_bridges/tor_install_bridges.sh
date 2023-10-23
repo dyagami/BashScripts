@@ -7,22 +7,16 @@ obfs4="ClientTransportPlugin obfs4 exec /usr/bin/obfs4proxy managed"
 torrc="/etc/tor/torrc"
 torconf="/etc/torrc.d"
 p4="/etc/proxychains4.conf"
-
-if [[ $( cat ${torrc} | grep -x "include ${torconf}/bridges.conf" ) == "" ]] ; then
-	echo "include ${torconf}/bridges.conf" >> ${torrc}
-fi
-
 declare -A bridge_array
 
 i=1
 while read LINE
 do
-        read -r	bridge_array[bridge$i] <<< "$LINE"
+	read -r	bridge_array[bridge$i] <<< "$LINE"
 	i=$(($i+1))	
 done < bridges.txt
 
-
-echo -e "${c}enter date (YYMMDD HH:MM)${r}"
+echo -e "${c}enter date (YYYYMMDD HH:MM)${r}"
 read dateinput
 
 echo -e "${c}setting system time...${r}"
@@ -60,12 +54,14 @@ case $OS in
 esac
 
 
-systemctl enable tor &&  systemctl start tor
 
 echo -e "${c}backing up torrc"
 
 cp /etc/tor/torrc /etc/tor/torrc.old
 
+if [[ $( cat ${torrc} | grep -x "%include ${torconf}/bridges.conf" ) == "" ]] ; then
+	sudo echo "%include ${torconf}/bridges.conf" >> $torrc
+fi
 
 echo -e "${c}making config file...${r}"
 
@@ -119,8 +115,15 @@ then
 	echo "socks5  127.0.0.1 9050" >> $p4
 fi
 
-echo -e "${c}restarting services...${r}"
-systemctl restart tor
+echo -e "${c}starting services...${r}"
+
+if [[ $( systemctl is-enabled tor ) == "disabled" ]] ; then
+	systemctl enable tor
+fi
+if [[ $( systemctl status tor | grep "active (running)" ) == "" ]] ; then
+	systemctl start tor
+fi
+
 echo -e "${c}DONE${r}"
 for i in {1..3}
 do
