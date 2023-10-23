@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Create variables
 c="\e[96m"
 r="\e[0m"
 obfs3="ClientTransportPlugin obfs3 exec /usr/bin/obfsproxy managed"
@@ -9,6 +10,7 @@ torconf="/etc/torrc.d"
 p4="/etc/proxychains4.conf"
 declare -A bridge_array
 
+# Read bridges from bridges.txt and iterate through them, adding them to an array 
 i=1
 while read LINE
 do
@@ -16,16 +18,15 @@ do
 	i=$(($i+1))	
 done < bridges.txt
 
+# Set system date manually (Kali doesn't use NTP by default)
 echo -e "${c}enter date (YYYYMMDD HH:MM)${r}"
 read dateinput
-
 echo -e "${c}setting system time...${r}"
 date --set="$dateinput"
 
+# Install Tor and Proxychains with desired Package Manager
 echo -e "${c}installing Tor and proxychains4...${r}"
-
 OS=$(uname -s | tr A-Z a-z)
-
 case $OS in
   linux)
     source /etc/os-release
@@ -53,18 +54,17 @@ case $OS in
     ;;
 esac
 
-
-
+# Back up torrc file
 echo -e "${c}backing up torrc"
-
 cp /etc/tor/torrc /etc/tor/torrc.old
 
+# Add include line to torrc file
 if [[ $( cat ${torrc} | grep -x "%include ${torconf}/bridges.conf" ) == "" ]] ; then
 	sudo echo "%include ${torconf}/bridges.conf" >> $torrc
 fi
 
+# Create bridges.conf config file in /etc/torrc.d
 echo -e "${c}making config file...${r}"
-
 if test -d /etc/torrc.d ; then
 	if test ! -f /etc/torrc.d/bridges.conf ; then
 		touch /etc/torrc.d/bridges.conf
@@ -74,9 +74,8 @@ else
 	touch /etc/torrc.d/bridges.conf
 fi
 
-
+# Add bridges from bridges.txt and other needed lines to /etc/torrc.d/bridges.conf
 echo -e "${c}adding bridges to Tor...${r}"
-
 if [[ $( cat ${torconf}/bridges.conf | grep "UseBridges 1")  == "" ]]
 then
 	echo 'UseBridges 1' >> $torconf/bridges.conf
@@ -103,6 +102,7 @@ do
 	fi
 done
 
+# Add Socks5 proxy pointing to Tor listener to Proxychains config
 echo -e "${c}editing proxychains4.conf file${r}"
 
 #if [[ $( cat ${p4} | grep -x "strict_chain") == "" ]]
@@ -115,8 +115,8 @@ then
 	echo "socks5  127.0.0.1 9050" >> $p4
 fi
 
+# Check for, enable and start Tor service 
 echo -e "${c}starting services...${r}"
-
 if [[ $( systemctl is-enabled tor ) == "disabled" ]] ; then
 	systemctl enable tor
 fi
@@ -132,3 +132,5 @@ do
 done
 echo "all done!"
 echo -e "${c}enter 'proxychains firefox' to use Tor with Firefox${r}"
+
+exit 0
