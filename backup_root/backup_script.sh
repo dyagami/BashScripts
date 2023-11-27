@@ -9,10 +9,10 @@ clear
 # in which the backups will reside
 # If backing up root partition, run with sudo
 
-backuppath="."
+backuppath="/rootbackups"
 pathtobackup="/"
 filepath="$backuppath/backups/backup_$(date +%m-%d-%y_%H:%M:%S).tar.gz" 
-backuplimit=7
+backuplimit=3
 redcolor="\e[31m"
 nocolor="\e[0m"
 
@@ -37,9 +37,11 @@ done
 
 # Archive and compress root filesystem
 
-touch $filepath
-tar --exclude-ignore-recursive=$backuppath/backups -czvf $filepath $pathtobackup
 clear
+
+touch $filepath
+sudo tar --exclude-ignore-recursive=$backuppath/backups/* -czvf $filepath $pathtobackup 1> /dev/null 
+
 
 # Declare filecount variable after checking for backup folder
 
