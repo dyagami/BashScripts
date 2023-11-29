@@ -10,7 +10,7 @@ clear
 # If backing up root partition, run with sudo
 
 backuppath="/rootbackups"
-pathtobackup="/"
+pathtobackup="/home/lain"
 filepath="$backuppath/backups/backup_$(date +%m-%d-%y_%H:%M:%S).tar.gz" 
 backuplimit=3
 redcolor="\e[31m"
@@ -42,6 +42,9 @@ clear
 touch $filepath
 sudo tar --exclude-ignore-recursive=$backuppath/backups/* -czvf $filepath $pathtobackup 1> /dev/null 
 
+echo -e "File created"
+echo -e "File path: ${redcolor}$filepath${nocolor}"
+echo -e "Size: ${redcolor}$(ls -lah $filepath | cut -d" " -f5)${nocolor}"
 
 # Declare filecount variable after checking for backup folder
 
@@ -53,7 +56,7 @@ echo -e "Current backup count: $redcolor$filecount$nocolor"
 # Check if there's more than $backuplimit backups and delete the oldest ones to not exceed it
 
 if [ $filecount -gt $(($backuplimit-1)) ] ; then
-	echo -e "Backups exceeded the limit of $redcolor$backuplimit$nocolor. \nWill now delete the oldest ones to not exceed limit... \n${redcolor}DONE.${nocolor}"
+	echo -e "Backups exceeded the limit of $redcolor$backuplimit$nocolor. \nWill now delete the oldest ones to not exceed limit... "
 
 else
 	echo -e "Will remove the oldest backup if the count goes up to: ${redcolor}${backuplimit}${nocolor}\n"
@@ -62,5 +65,5 @@ while [ $filecount -gt $backuplimit ]; do
 	rm $backuppath/backups/$(ls $backuppath/backups | sort | head -1)
 	filecount=$(($filecount-1))
 done
-echo -e "Backup count after deletion: $redcolor$filecount$nocolor"
+echo -e "Backup count: $redcolor$filecount$nocolor"
 echo -e "${redcolor}DONE${nocolor}"
