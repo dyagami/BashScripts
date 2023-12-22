@@ -8,4 +8,4 @@
 3. run "sudo ./tor_install_bridges.sh"
 4. use "proxychains firefox" or any other program name to route all traffic of such program through Tor 
 
-To remove changed settings just remove "tor", "torbrowser-launcher" and "proxychains" (or "proxychains-ng" in case of dnf-based distros), remove /etc/torrc.d/bridges.conf file and rename /etc/tor/torrc.old to torrc. May add removal feature later, don't promise it though.
+To remove changed settings and packages, run the script with "-d" option.

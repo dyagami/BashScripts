@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # Create variables
 c="\e[96m"
 r="\e[0m"
@@ -10,6 +11,32 @@ torconf="/etc/torrc.d"
 p4="/etc/proxychains4.conf"
 declare -A bridge_array
 
+# Check for -d option to remove the installed packages
+
+while getopts "d" opt; do
+	echo "Removing associated configuration files..."
+	! [[ -f "$torconf/bridges.conf" ]] | rm "$torconf/bridges.conf"
+	if [[ -f /etc/tor/torrc.old ]]; then
+		mv /etc/tor/torrc.old /etc/tor/torrc
+	else
+		rm /etc/tor/torrc
+	fi
+	echo "Uninstalling packages..."
+	source /etc/os-release
+ 	case "$ID" in
+	      debian|ubuntu|mint)
+		apt purge -y tor torbrowser-launcher proxychains4;;
+      		fedora|rhel|centos)
+ 		dnf remove -y tor proxychains-ng;;
+		arch)
+		pacman -Rsn --noconfirm tor torbrowser-launcher proxychains4;;
+		\?)
+	        echo -n "unsupported linux distro";;
+	esac
+	echo "all done!"
+	exit 0
+
+done
 # Read bridges from bridges.txt and iterate through them, adding them to an array 
 i=1
 while read LINE
@@ -27,31 +54,23 @@ date --set="$dateinput"
 # Install Tor and Proxychains with desired Package Manager
 echo -e "${c}installing Tor and proxychains4...${r}"
 OS=$(uname -s | tr A-Z a-z)
-case $OS in
+case "$OS" in
   linux)
     source /etc/os-release
-    case $ID in
+    case "$ID" in
       debian|ubuntu|mint)
  	apt update
-	apt install -y tor torbrowser-launcher proxychains4
-        ;;
-
+	apt install -y tor torbrowser-launcher proxychains4;;
       fedora|rhel|centos)
 	dnf update -y --allowerasing --nobest --skip-broken
- 	dnf install -y tor proxychains-ng
-        ;;
-
+ 	dnf install -y tor proxychains-ng;;
 	arch)
-	pacman -Syu --noconfirm tor torbrowser-launcher proxychains4
-	;;
+	pacman -Syu --noconfirm tor torbrowser-launcher proxychains4;;
 	*)
-        echo -n "unsupported linux distro"
-        ;;
-    esac
-  ;;
-  *)
-    echo -n "unsupported OS"
-    ;;
+        echo -n "unsupported linux distro";;
+    esac;;
+  \?)
+    echo -n "unsupported OS";;
 esac
 
 # Back up torrc file
@@ -59,14 +78,14 @@ echo -e "${c}backing up torrc"
 cp /etc/tor/torrc /etc/tor/torrc.old
 
 # Add include line to torrc file
-if [[ $( cat ${torrc} | grep -x "%include ${torconf}/bridges.conf" ) == "" ]] ; then
-	sudo echo "%include ${torconf}/bridges.conf" >> $torrc
+if [[ $( cat "$torrc" | grep -x "%include $torconf/bridges.conf" ) == "" ]] ; then
+	sudo echo "%include $torconf/bridges.conf" >> "$torrc"
 fi
 
 # Create bridges.conf config file in /etc/torrc.d
 echo -e "${c}making config file...${r}"
-if test -d /etc/torrc.d ; then
-	if test ! -f /etc/torrc.d/bridges.conf ; then
+if [[ -d /etc/torrc.d ]] ; then
+	if ! [[ -f /etc/torrc.d/bridges.conf ]] ; then
 		touch /etc/torrc.d/bridges.conf
 	fi
 else
@@ -76,26 +95,26 @@ fi
 
 # Add bridges from bridges.txt and other needed lines to /etc/torrc.d/bridges.conf
 echo -e "${c}adding bridges to Tor...${r}"
-if [[ $( cat ${torconf}/bridges.conf | grep "UseBridges 1")  == "" ]]
+if [[ $( cat "$torconf/bridges.conf" | grep "UseBridges 1")  == "" ]]
 then
-	echo 'UseBridges 1' >> $torconf/bridges.conf
+	echo 'UseBridges 1' >> "$torconf/bridges.conf"
 fi
 
-if [[ $( cat ${torconf}/bridges.conf | grep "${obfs3}") == "" ]]
+if [[ $( cat "$torconf/bridges.conf" | grep "$obfs3") == "" ]]
 then
-	echo "${obfs3}" >> $torconf/bridges.conf
+	echo "$obfs3" >> "$torconf/bridges.conf"
 fi
 
-if [[ $( cat ${torconf}/bridges.conf | grep "${obfs4}") == "" ]]
+if [[ $( cat "$torconf/bridges.conf" | grep "$obfs4") == "" ]]
 then
-	echo "${obfs4}" >> $torconf/bridges.conf
+	echo "$obfs4" >> "$torconf/bridges.conf"
 fi
 
 for b in "${bridge_array[@]}"
 do
-	if [[ $( cat ${torconf}/bridges.conf | grep -x "bridge ${b}") == "" ]]
+	if [[ $( cat "$torconf/bridges.conf" | grep -x "bridge $b") == "" ]]
 	then
-		echo "bridge ${b}" >> $torconf/bridges.conf
+		echo "bridge $b" >> "$torconf/bridges.conf"
 		echo -e "${c}${b}  added!${r}"
 	else
 		echo -e "${c}${b}  already exists, skipping...!${r}"
@@ -110,9 +129,9 @@ echo -e "${c}editing proxychains4.conf file${r}"
 #	sed -i "s/strict_chain/dynamic_chain/" $p4
 #fi
 
-if [[ $( cat ${p4} | grep -x "socks5  127.0.0.1 9050") == "" ]]
+if [[ $( cat "$p4" | grep -x "socks5  127.0.0.1 9050") == "" ]]
 then 
-	echo "socks5  127.0.0.1 9050" >> $p4
+	echo "socks5  127.0.0.1 9050" >> "$p4"
 fi
 
 # Check for, enable and start Tor service 
