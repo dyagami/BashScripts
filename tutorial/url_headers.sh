@@ -3,5 +3,6 @@
 readarray -t urls < urls.txt
 
 for i in "${urls[@]}"; do
-	curl $i --head > "$i.txt"
+	webname=$(echo $i | cut -d "." -f 2)
+	curl $i --head > "$webname.txt"
 done
