@@ -15,7 +15,7 @@ declare -A bridge_array
 
 while getopts "d" opt; do
 	echo "Removing associated configuration files..."
-	! [[ -f "$torconf/bridges.conf" ]] | rm "$torconf/bridges.conf"
+	! [[ -f "$torconf/bridges.conf" ]] || rm "$torconf/bridges.conf"
 	if [[ -f /etc/tor/torrc.old ]]; then
 		mv /etc/tor/torrc.old /etc/tor/torrc
 	else
@@ -78,8 +78,8 @@ echo -e "${c}backing up torrc"
 cp /etc/tor/torrc /etc/tor/torrc.old
 
 # Add include line to torrc file
-if [[ $( cat "$torrc" | grep -x "%include $torconf/bridges.conf" ) == "" ]] ; then
-	sudo echo "%include $torconf/bridges.conf" >> "$torrc"
+if [[ $( grep -x "%include $torconf/bridges.conf" < "$torrc" ) == "" ]] ; then
+	echo "%include $torconf/bridges.conf" >> "$torrc"
 fi
 
 # Create bridges.conf config file in /etc/torrc.d
@@ -95,24 +95,24 @@ fi
 
 # Add bridges from bridges.txt and other needed lines to /etc/torrc.d/bridges.conf
 echo -e "${c}adding bridges to Tor...${r}"
-if [[ $( cat "$torconf/bridges.conf" | grep "UseBridges 1")  == "" ]]
+if [[ $( grep "UseBridges 1" < "$torconf/bridges.conf" )  == "" ]]
 then
 	echo 'UseBridges 1' >> "$torconf/bridges.conf"
 fi
 
-if [[ $( cat "$torconf/bridges.conf" | grep "$obfs3") == "" ]]
+if [[ $( grep "$obfs3" < "$torconf/bridges.conf" )  == "" ]]
 then
 	echo "$obfs3" >> "$torconf/bridges.conf"
 fi
 
-if [[ $( cat "$torconf/bridges.conf" | grep "$obfs4") == "" ]]
+if [[ $( grep "$obfs4" < "$torconf/bridges.conf" ) == "" ]]
 then
 	echo "$obfs4" >> "$torconf/bridges.conf"
 fi
 
 for b in "${bridge_array[@]}"
 do
-	if [[ $( cat "$torconf/bridges.conf" | grep -x "bridge $b") == "" ]]
+	if [[ $( grep -x "bridge $b" < "$torconf/bridges.conf" )  == "" ]]
 	then
 		echo "bridge $b" >> "$torconf/bridges.conf"
 		echo -e "${c}${b}  added!${r}"
@@ -129,7 +129,7 @@ echo -e "${c}editing proxychains4.conf file${r}"
 #	sed -i "s/strict_chain/dynamic_chain/" $p4
 #fi
 
-if [[ $( cat "$p4" | grep -x "socks5  127.0.0.1 9050") == "" ]]
+if [[ $( grep -x "socks5  127.0.0.1 9050" < "$p4" ) == "" ]]
 then 
 	echo "socks5  127.0.0.1 9050" >> "$p4"
 fi
