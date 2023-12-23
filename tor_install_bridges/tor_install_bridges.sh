@@ -139,7 +139,7 @@ echo -e "${c}starting services...${r}"
 if [[ $( systemctl is-enabled tor ) == "disabled" ]] ; then
 	systemctl enable tor
 fi
-if [[ $( systemctl status tor | grep "active (running)" ) == "" ]] ; then
+if [[ ! $( systemctl status tor ) == "active (running)" ]] ; then
 	systemctl start tor
 fi
 

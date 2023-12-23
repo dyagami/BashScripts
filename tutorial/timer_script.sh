@@ -2,7 +2,7 @@
 
 usage=$'\nUsage:\ntimer_script.sh -m MINUTES (optional) -s SECONDS\n'
 total_seconds=""
-while getopts "m:s:b:" opt; do
+while getopts "m:s:" opt; do
 	case "$opt" in
 		m)
 		if [[ "$OPTARG" == *[!0-9]* ]]; then	
