@@ -42,6 +42,7 @@ while getopts "d:l:p:h" opt; do
 			echo "	-d DIRECTORY - Directory which will be backed up. [DEFAULT: $HOME]"
 			echo "	-l LIMIT - Backup limit after which the script will remove the oldest backups. Use with caution. [DEFAULT: $backuplimit]"
 			echo "	-p PATH - Path in which the script will create a backup folder and store backups. [DEFAULT: $backuppath/backups]"
+			echo "	-h - view this help page."
 			exit 0
 			;;
 		\?)
