@@ -17,12 +17,10 @@ for i in $( ls ); do
 			if [[ -n $(git status | grep "Changes to be committed") ]]; then
 				echo -e "${BLUE}$i${NC}: committing changes"
 				git commit -m "auto-generated commit" 1>/dev/null
-				echo -e "${BLUE}$i${NC}: committing changes - ${GREEN}DONE${NC}"
 			fi
 			if [[ -n $(git status | grep "Changes not staged") || -n $(git status | grep "Untracked files") ]] ; then
 				echo -e "${BLUE}$i${NC}: staging changes for commit"
 				git add . 1>/dev/null
-				echo -e "${BLUE}$i${NC}: staging changes for commit - ${GREEN}DONE${NC}"
 			fi
 		done
 		echo -e "${BLUE}$i${NC}: ${GREEN}check done${NC}\n"

@@ -1,0 +1,1 @@
+A simple Bash script to check local git repositories in the directory it's being run from for changes, committing and pushing them to their remote repositories. I wrote it to quickly push changes rsynced from different local hosts.
