@@ -8,7 +8,7 @@ for i in $( ls ); do
 	if [[ -d $i && "$i" != '.' && "$i" != '..' ]] ; then
 		echo -e "checking: ${BLUE}$i${NC}"
 		cd $i
-		while [[ -n $(git status | grep "Your branch is ahead") || -n $(git status | grep "Changes to be committed") || -n $(git status | grep "Untracked files") ]]; do
+		while [[ -n $(git status | grep "Your branch is ahead") || -n $(git status | grep "Changes to be committed") || -n $(git status | grep "Untracked files") || -n $(git status | grep "Changes not staged") ]]; do
 			if [[ -n $(git status | grep "Your branch is ahead") ]] ; then
 				echo -e "${BLUE}$i${NC}: pushing commits"
 				git push 1>/dev/null
@@ -25,7 +25,7 @@ for i in $( ls ); do
 				echo -e "${BLUE}$i${NC}: staging changes for commit - ${GREEN}DONE${NC}"
 			fi
 		done
-		echo -e "${BLUE}$i${NC}: checking ${GREEN}done${NC}\n"
+		echo -e "${BLUE}$i${NC}: ${GREEN}check done${NC}\n"
 		cd $OLDPWD
 	fi
 done
