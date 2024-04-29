@@ -1,1 +1,1 @@
-A simple Bash script to check local git repositories in the directory it's being run from for changes, committing and pushing them to their remote repositories. I wrote it to quickly push changes rsynced from different local hosts.
+A simple Bash script to check local git repositories in the directory it's being run from for changes, committing and pushing them to their remote repositories. I wrote it to quickly push changes rsynced from different local hosts, instead of pushing from them for security and scalability reasons. Can also work well as a cron job.
