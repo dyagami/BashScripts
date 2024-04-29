@@ -4,11 +4,18 @@ BLUE='\033[0;34m'
 GREEN='\033[1;32m'
 NC='\033[0m'
 clear
+
 for i in $( ls ); do
-	if [[ -d $i && "$i" != '.' && "$i" != '..' ]] ; then
+
+#check current directory for subdirectories and check if they are git repos
+	if [[ -d $i && "$i" != '.' && "$i" != '..' && -d $i/.git ]] ; then
 		echo -e "checking: ${BLUE}$i${NC}"
 		cd $i
+
+#check for git statuses other than the repo being up-to-date with remote origin
 		while [[ -n $(git status | grep "Your branch is ahead") || -n $(git status | grep "Changes to be committed") || -n $(git status | grep "Untracked files") || -n $(git status | grep "Changes not staged") ]]; do
+
+#process git commands until the repo is up-to-date
 			if [[ -n $(git status | grep "Your branch is ahead") ]] ; then
 				echo -e "${BLUE}$i${NC}: pushing commits"
 				git push 1>/dev/null
@@ -28,20 +35,3 @@ for i in $( ls ); do
 	fi
 done
 echo -e "all done!\n"
-#Your branch is up to date with 'origin/master'.
-#nothing to commit, working tree clean
-
-#Your branch is up to date with 'origin/master'.
-#Untracked files:
-#(use "git add <file>..." to include in what will be committed)
-#test
-#nothing added to commit but untracked files present (use "git add" to track)
-
-#Your branch is up to date with 'origin/master'.
-#Changes to be committed:
-#(use "git restore --staged <file>..." to unstage)
-#new file:   test
-
-#Your branch is ahead of 'origin/master' by 1 commit.
-#(use "git push" to publish your local commits)
-#nothing to commit, working tree clean
