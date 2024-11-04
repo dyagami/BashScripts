@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [ "$1" == "" ]; then
+	echo -e "\tUsage:\n\t\topp  (rough entry name)...\n"
+	exit 1
+else
+	mv ~/.cache/cliphist/db ~/.cache/cliphist/db.bak; cliphist wipe
+	username=$(op item get "$1" --fields username)
+	password=$(op item get "$1" --fields password)
+	echo "$password" | cliphist store
+	echo "$username" | cliphist store
+
+	x=20
+	if ! [ "$username" == "" ] && ! [ "$password" == "" ]; then
+		echo "Credentials will be stored in clipboard history for: "
+		while (( $x != 0 )) ; do
+			echo -n "$x.."
+			sleep 1
+			x=$(( x - 1 ))
+		done
+
+		cliphist wipe; mv ~/.cache/cliphist/db.bak ~/.cache/cliphist/db
+		echo "Wiped."
+	else
+		echo -e "\n\tErrors encountered (check above and precise entry name), exiting...\n"
+		cliphist wipe; mv ~/.cache/cliphist/db.bak ~/.cache/cliphist/db
+		exit 1
+	fi
+fi
