@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Script to use with Cron to update Debian and send result to system journal
+#
+apt-get update > /apt.log 2> /apt.err
+if [[ -z $(apt-get update 2>&1 | grep -x "All packages are up to date." ) ]]; then
+	apt-get upgrade -y > /apt.log 2> /apt.err
+	if [[ -n $(cat /apt.err ) ]]; then
+		cat /apt.err | tail -1 | systemd-cat -t system-update -p err
+	else
+		cat /apt.log | tail -1 | systemd-cat -t system-update -p info 
+	fi
+	
+else
+	cat /apt.log | tail -1 | systemd-cat -t system-update -p info 
+fi
+
+
